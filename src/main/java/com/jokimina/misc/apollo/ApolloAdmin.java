@@ -4,6 +4,7 @@ import com.ctrip.framework.apollo.openapi.client.ApolloOpenApiClient;
 import com.ctrip.framework.apollo.openapi.dto.NamespaceReleaseDTO;
 import com.ctrip.framework.apollo.openapi.dto.OpenNamespaceDTO;
 import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
  * @author xiaodong
  * 12/14/2018
  */
-
+@Slf4j
 public class ApolloAdmin {
     public static void main(String[] args) {
         String url = System.getProperty("url");
@@ -31,10 +32,10 @@ public class ApolloAdmin {
         List<OpenNamespaceDTO> sNamespaces = client.getNamespaces(appId, env, sClusterName);
         sNamespaces.stream().forEach(sNamespace -> {
             OpenNamespaceDTO dNamespace = client.getNamespace(appId, env, dClusterName, sNamespace.getNamespaceName());
-            System.out.println(String.format("Sync env %s app %s cluster %s namespace %s -> Sync env %s app %s cluster %s namespace %s", env, appId, sClusterName, sNamespace.getNamespaceName(), env, appId, dClusterName, dNamespace.getNamespaceName()));
+            log.info(String.format("Sync env %s app %s cluster %s namespace %s -> Sync env %s app %s cluster %s namespace %s", env, appId, sClusterName, sNamespace.getNamespaceName(), env, appId, dClusterName, dNamespace.getNamespaceName()));
             sNamespace.getItems().stream().forEach(item -> {
                 try {
-                    System.out.println(item.getKey());
+                    log.info(item.getKey());
                     if (!Strings.isNullOrEmpty(item.getKey()) && !Strings.isNullOrEmpty(item.getValue())) {
                         try {
                             client.createItem(appId, env, dClusterName, dNamespace.getNamespaceName(), item);

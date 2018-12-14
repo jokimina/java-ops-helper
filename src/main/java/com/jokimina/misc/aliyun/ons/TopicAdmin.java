@@ -12,6 +12,7 @@ import com.aliyuncs.ons.model.v20170918.OnsTrendTopicInputTpsRequest;
 import com.aliyuncs.ons.model.v20170918.OnsTrendTopicInputTpsResponse;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.List;
  * @author xiaodong
  * 12/14/2018
  */
+@Slf4j
 public class TopicAdmin {
 
     static final String ONS_REGION_ID = "mq-internet-access";
@@ -38,10 +40,10 @@ public class TopicAdmin {
         List<OnsTopicListResponse.PublishInfoDo> topics = getTopics(iAcsClient);
         topics.forEach(ons -> {
             String topicName = ons.getTopic();
-            System.out.println("-- check ons " + topicName);
+            log.info("-- check ons " + topicName);
             List<OnsTrendTopicInputTpsResponse.Data.StatsDataDo> onsTps = getOnsTps(iAcsClient, topicName);
             if (!onsTps.stream().anyMatch(s -> s.getY() > 0)) {
-                System.out.println("leisure topic: " + ons.getTopic());
+                log.info("leisure topic: " + ons.getTopic());
                 leisureTopics.add(ons.getTopic());
             }
         });
