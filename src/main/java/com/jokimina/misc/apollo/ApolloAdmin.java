@@ -18,7 +18,7 @@ public class ApolloAdmin {
     public static void main(String[] args) {
         String url = System.getProperty("url");
         String token = System.getProperty("token");
-        final List<String> apps = Arrays.asList("sc-user");
+        final List<String> apps = Arrays.asList("sc-collection");
         final String env = "PRO";
         final String sClusterName = "indonesia";
         final String dClusterName = "singapore";
