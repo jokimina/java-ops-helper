@@ -1,11 +1,14 @@
 package com.jokimina.misc.apollo;
 
+import com.ctrip.framework.apollo.core.utils.StringUtils;
 import com.ctrip.framework.apollo.openapi.client.ApolloOpenApiClient;
+import com.ctrip.framework.apollo.openapi.client.exception.ApolloOpenApiException;
 import com.ctrip.framework.apollo.openapi.dto.NamespaceReleaseDTO;
 import com.ctrip.framework.apollo.openapi.dto.OpenNamespaceDTO;
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,14 +21,54 @@ public class ApolloAdmin {
     public static void main(String[] args) {
         String url = System.getProperty("url");
         String token = System.getProperty("token");
-        final List<String> apps = Arrays.asList("sc-collection");
-        final String env = "PRO";
+        final List<String> apps = Arrays.asList("sc-test");
+        final List<String> envs = Arrays.asList("DEV", "UAT", "PRO");
+//        final String env = "PRO";
         final String sClusterName = "indonesia";
         final String dClusterName = "singapore";
         ApolloOpenApiClient client = ApolloOpenApiClient.newBuilder().withPortalUrl(url).withToken(token).build();
+        envs.stream().forEach(env ->
+                apps.stream().forEach(appId ->
+                        compareNamespaceItems(client, env, appId)
+                )
+        );
         apps.stream().forEach(appId -> {
-            syncCluster(client, appId, env, sClusterName, dClusterName);
+//            syncCluster(client, appId, env, sClusterName, dClusterName);
         });
+    }
+
+    static void compareNamespaceItems(ApolloOpenApiClient client, String env, String appid) {
+        List<String> applicationItemKeys = new ArrayList<>();
+        List<String> otherItemKeys = new ArrayList<>();
+        client.getEnvClusterInfo(appid).stream().forEach(instance -> {
+                    instance.getClusters().stream().forEach(cluster -> {
+                                try {
+                                    client.getNamespaces(appid, env, cluster).forEach(ns ->
+                                            {
+                                                ns.getItems().forEach(item -> {
+                                                    if (StringUtils.isEmpty(item.getKey())) return;
+                                                    if (ns.getNamespaceName().equals("application")) {
+                                                        applicationItemKeys.add(item.getKey());
+                                                    } else {
+                                                        otherItemKeys.add(item.getKey());
+                                                    }
+                                                });
+                                            }
+                                    );
+                                } catch (Exception e) {
+                                    log.error(e.getMessage());
+                                } finally {
+                                    applicationItemKeys.retainAll(otherItemKeys);
+                                    if (applicationItemKeys.size() > 0) {
+                                        log.warn("[{} > {} > {}] has repeat keys {}", appid, env, cluster, applicationItemKeys.toString());
+                                    }
+                                    applicationItemKeys.clear();
+                                    otherItemKeys.clear();
+                                }
+                            }
+                    );
+                }
+        );
     }
 
     static void syncCluster(ApolloOpenApiClient client, String appId, String env, String sClusterName, String dClusterName) {
