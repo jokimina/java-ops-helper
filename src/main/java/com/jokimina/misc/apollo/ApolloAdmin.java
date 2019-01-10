@@ -21,7 +21,7 @@ public class ApolloAdmin {
     public static void main(String[] args) {
         String url = System.getProperty("url");
         String token = System.getProperty("token");
-        final List<String> apps = Arrays.asList("sc-test");
+        final List<String> apps = Arrays.asList("sc-aql");
         final List<String> envs = Arrays.asList("DEV", "UAT", "PRO");
 //        final String env = "PRO";
         final String sClusterName = "indonesia";
@@ -32,9 +32,9 @@ public class ApolloAdmin {
                         compareNamespaceItems(client, env, appId)
                 )
         );
-        apps.stream().forEach(appId -> {
+//        apps.stream().forEach(appId -> {
 //            syncCluster(client, appId, env, sClusterName, dClusterName);
-        });
+//        });
     }
 
     static void compareNamespaceItems(ApolloOpenApiClient client, String env, String appid) {
@@ -45,6 +45,7 @@ public class ApolloAdmin {
                                 try {
                                     client.getNamespaces(appid, env, cluster).forEach(ns ->
                                             {
+                                                log.info("[{} > {} > {} --> {}] done.....", appid, env, cluster, ns.getNamespaceName());
                                                 ns.getItems().forEach(item -> {
                                                     if (StringUtils.isEmpty(item.getKey())) return;
                                                     if (ns.getNamespaceName().equals("application")) {
@@ -56,11 +57,15 @@ public class ApolloAdmin {
                                             }
                                     );
                                 } catch (Exception e) {
-                                    log.error(e.getMessage());
+                                    if (!e.getCause().toString().contains("namespaces not exist")){
+                                        log.error(e.getMessage(), e.getCause());
+                                    }
                                 } finally {
                                     applicationItemKeys.retainAll(otherItemKeys);
                                     if (applicationItemKeys.size() > 0) {
                                         log.warn("[{} > {} > {}] has repeat keys {}", appid, env, cluster, applicationItemKeys.toString());
+                                    } else {
+                                        log.info("[{} > {} > {}] done.....", appid, env, cluster);
                                     }
                                     applicationItemKeys.clear();
                                     otherItemKeys.clear();
