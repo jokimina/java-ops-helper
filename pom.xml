@@ -53,6 +53,16 @@
             <artifactId>logback-classic</artifactId>
             <version>1.0.13</version>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.59</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun.openservices</groupId>
+            <artifactId>aliyun-log</artifactId>
+            <version>0.6.33</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>
