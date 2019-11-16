@@ -7,7 +7,6 @@ import com.aliyun.openservices.log.http.client.ClientConfiguration;
 import com.aliyun.openservices.log.request.DeleteLogStoreRequest;
 import com.aliyun.openservices.log.request.GetLogsRequest;
 import com.aliyun.openservices.log.request.ListLogStoresRequest;
-import com.aliyun.openservices.log.response.DeleteLogStoreResponse;
 import com.aliyun.openservices.log.response.GetLogsResponse;
 import com.aliyun.openservices.log.response.ListLogStoresResponse;
 import com.aliyun.openservices.log.response.ListProjectResponse;
@@ -45,19 +44,19 @@ public class LogAdmin {
         }
     }
 
-    static List<String> listLogstore(Client client, String project) throws LogException {
+    private static List<String> listLogstore(Client client, String project) throws LogException {
         ListLogStoresRequest listLogStoresRequest = new ListLogStoresRequest(project, 0, 1000, "");
         ListLogStoresResponse listLogStoresResponse = client.ListLogStores(listLogStoresRequest);
         return listLogStoresResponse.GetLogStores();
     }
 
-    static void deleteLogstore(Client client, String project, String logstore) throws LogException {
+    private static void deleteLogstore(Client client, String project, String logstore) throws LogException {
         DeleteLogStoreRequest deleteLogStoreRequest = new DeleteLogStoreRequest(project, logstore);
-        DeleteLogStoreResponse deleteLogStoreResponse = client.DeleteLogStore(deleteLogStoreRequest);
+        client.DeleteLogStore(deleteLogStoreRequest);
         log.info("delete logstore {} in project {}", logstore, project);
     }
 
-    static int getLogstore30dayCount(Client client, String project, String logstore) {
+    private static int getLogstore30dayCount(Client client, String project, String logstore) {
         int now = (int) (System.currentTimeMillis() / 1000);
         GetLogsRequest getLogsRequest = new GetLogsRequest(project, logstore, now - 86400 * 90, now, "", "*");
         GetLogsResponse getLogsResponse = null;
@@ -70,7 +69,7 @@ public class LogAdmin {
         return getLogsResponse.GetCount();
     }
 
-    static List<String> listProjects(Client client) throws LogException {
+    private static List<String> listProjects(Client client) throws LogException {
         ListProjectResponse listProjectResponse = client.ListProject();
         List<String> projects = listProjectResponse.getProjects()
                 .stream()
